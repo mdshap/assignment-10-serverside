@@ -32,7 +32,7 @@ async function run() {
     const booksCollection = db.collection("books");
 
     app.get("/books", async (req, res) => {
-      const books = booksCollection.find();
+      const books = booksCollection.find().sort({ rating: -1 });
       const result = await books.toArray();
       res.send(result);
     });
