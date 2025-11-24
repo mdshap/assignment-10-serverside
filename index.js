@@ -67,6 +67,7 @@ async function run() {
         photoURL: photoURL || null,
         createdAt: new Date(),
       };
+      
 
       const result = await commentsCollection.insertOne(comment);
       res.send(result);
