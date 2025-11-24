@@ -30,9 +30,10 @@ async function run() {
 
     const db = client.db("booksHavenDB");
     const booksCollection = db.collection("books");
+    const commentsCollection = db.collection("comments");
 
     app.get("/books", async (req, res) => {
-      const books = booksCollection.find().sort({ rating: -1 });
+      const books = booksCollection.find().sort({ createdAt: -1 });
       const result = await books.toArray();
       res.send(result);
     });
@@ -44,14 +45,44 @@ async function run() {
       res.send(result);
     });
 
+    app.get("/books/:id/comments", async (req, res) => {
+      const bookId = req.params.id;
+      const cursor = commentsCollection
+        .find({ bookId })
+        .sort({ createdAt: -1 });
+      const comments = await cursor.toArray();
+      
+      res.send(comments);
+    });
+
+    app.post("/books/:id/comments", async (req, res) => {
+      const bookId = req.params.id;
+      const { userName, userEmail, text, photoURL } = req.body;
+
+      const comment = {
+        bookId,
+        userName: userName || "Anonymous",
+        userEmail,
+        text,
+        photoURL: photoURL || null,
+        createdAt: new Date(),
+      };
+
+      const result = await commentsCollection.insertOne(comment);
+      res.send(result);
+    });
+
     app.get("/popular-books", async (req, res) => {
-      const books = booksCollection.find().sort({ rating: -1 }).limit(6);
+      const books = booksCollection.find().sort({ createdAt: -1 }).limit(6);
       const result = await books.toArray();
       res.send(result);
     });
 
     app.post("/books", async (req, res) => {
-      const newBook = req.body;
+      const newBook = {
+        ...req.body,
+        createdAt: new Date(),
+      };
       const result = await booksCollection.insertOne(newBook);
       res.send(result);
     });
@@ -59,7 +90,7 @@ async function run() {
     app.get("/my-books/:email", async (req, res) => {
       const email = req.params.email;
       const query = { userEmail: email };
-      const books = booksCollection.find(query).sort({rating: -1});
+      const books = booksCollection.find(query).sort({ rating: -1 });
       const result = await books.toArray();
       res.send(result);
     });
