@@ -51,7 +51,7 @@ async function run() {
         .find({ bookId })
         .sort({ createdAt: -1 });
       const comments = await cursor.toArray();
-      
+
       res.send(comments);
     });
 
@@ -67,7 +67,6 @@ async function run() {
         photoURL: photoURL || null,
         createdAt: new Date(),
       };
-      
 
       const result = await commentsCollection.insertOne(comment);
       res.send(result);
